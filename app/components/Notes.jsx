@@ -2,6 +2,7 @@ import React from 'react';
 import Note from './Note.jsx';
 
 export default ({notes, onEdit, onDelete}) => {
+	console.log(onEdit);
 	return (
 		<ul className="notes">{notes.map(note =>
 			<li className="note" key={note.id}>
