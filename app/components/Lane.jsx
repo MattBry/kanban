@@ -1,6 +1,7 @@
 import AltContainer from 'alt-container';
 import React from 'react';
 import Notes from './Notes.jsx';
+import Editable from './Editable.jsx'
 import NoteActions from '../actions/NoteActions';
 import NoteStore from '../stores/NoteStore';
 import LaneActions from '../actions/LaneActions';
@@ -10,11 +11,11 @@ export default class Lane extends React.Component {
 		const {lane, ...props} = this.props;
 		return(
 			<div {...props}>
-				<div className="lane-header">
-				<div className="lane-name">{lane.name}</div>
-
-					<div className="lane-add-note">
-						<button onClick={this.addNote}>+</button>
+				<div className="lane-header" onClick={this.activateLaneEdit}>
+					<Editable className="lane-name" editing={lane.editing}
+						value={lane.name} onEdit={this.editName} />
+					<div className="lane-delete">
+						<button onClick={this.deleteLane}>+</button>
 					</div>
 				</div>
 				<AltContainer
@@ -23,16 +24,21 @@ export default class Lane extends React.Component {
 						notes: () => NoteStore.getNotesByIds(lane.notes)
 					}}
 				>
-					<Notes onEdit={this.editNote} onDelete={this.deleteNote} />
+					<Notes 
+						onEdit={this.editNote} 
+						onDelete={this.deleteNote} 
+						onValueClick={this.activateNoteEdit}
+						/>
 				</AltContainer>
 			</div>
 			)
 	}
 	editNote(id, task) {
-		if(!task.trim()) {
+		if(! task.trim()) {
+			NoteActions.update({id, editing: false});
 			return;
 		}
-		NoteActions.update({id, task});
+		Noteactions.update({id, task, editing: false});
 	}
 	addNote = (e) => {
 		const laneId = this.props.lane.id;
@@ -50,4 +56,23 @@ export default class Lane extends React.Component {
 		LaneActions.detachFromLane({laneId, noteId});
 		NoteActions.delete(noteId);
 	};
+	editName = (name) => {
+		const laneId = this.props.laneId;
+		if(!name.trim()) {
+			LaneActions.update({id: laneId, editing: false});
+			return;
+		}
+		LaneActions.update({id: laneId, name, editing: false});
+	}
+	deleteLane = () => {
+		const laneId = this.props.lane.id;
+		LaneActions.delete(laneId);
+	}
+	activateLaneEdit = () => {
+		const laneId = this.props.lane.id;
+		LaneActions.update({id: laneId, editing: true});
+	}
+	activateNoteEdit = () => {
+		NoteActions.update({id, editing: true});
+	}
 }
