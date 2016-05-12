@@ -6,6 +6,9 @@ class NoteStore {
 	constructor() {
 		this.bindActions(NoteActions);
 		this.notes = [];
+		this.exportPublicMethods({
+			getNotesByIds: this.getNotesByIds.bind(this)
+		});
 	}
 	create(note){
 		const notes = this.notes;
@@ -13,6 +16,7 @@ class NoteStore {
 		this.setState({
 			notes: notes.concat(note)
 		});
+		return note;
 	}
 	update(updatedNote) {
 		const notes = this.notes.map(note => {
@@ -27,6 +31,13 @@ class NoteStore {
 		this.setState({
 			notes: this.notes.filter(note => note.id !== id)
 		});
+	}
+	getNotesByIds(ids) {
+		return (ids || []).reduce((notes, id) =>
+			notes.concat(
+				this.notes.filter(note => note.id === id)
+			)
+		, []);
 	}
 }
 export default alt.createStore(NoteStore, 'NoteStore');
